@@ -8,7 +8,7 @@ const text = ref('');
 const fileName = ref('');
 const walletId = ref('');
 const mePayor = ref('');
-const dontDeductWallet = ref(true); // default true for historical imports so wallet isn't negative
+const dontDeductWallet = ref(true); // imported rows are history by default: they do not move the wallet balance
 const mapping = reactive({}); // old category name -> category id | NEW
 const busy = ref(false);
 const result = ref(null);
@@ -156,6 +156,7 @@ async function runImport() {
         paid_by_partner: rec.byPartner,
         is_shared: rec.shared,
         is_fixed: r.isFixed,
+        is_historical: dontDeductWallet.value, // history only: shown in reports, never changes the wallet balance
         wallet_id: walletId.value,
         category_id: idByOld[r.category || 'Other'],
         occurred_at: r.occurredAt,
@@ -165,16 +166,6 @@ async function runImport() {
     for (let i = 0; i < payload.length; i += 200) {
       const { error: err } = await supabase.from('transactions').insert(payload.slice(i, i + 200));
       if (err) throw err;
-    }
-
-    // 4) If dontDeductWallet is checked, auto-adjust the wallet initial_balance so the wallet balance stays unchanged
-    if (dontDeductWallet.value && payload.length) {
-      const totalImportedCost = payload.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-      const { data: wData } = await supabase.from('wallets').select('initial_balance').eq('id', walletId.value).maybeSingle();
-      if (wData) {
-        const currentInitial = Number(wData.initial_balance || 0);
-        await supabase.from('wallets').update({ initial_balance: currentInitial + totalImportedCost }).eq('id', walletId.value);
-      }
     }
 
     result.value = { imported: payload.length, duplicates: importable.value.length - payload.length };

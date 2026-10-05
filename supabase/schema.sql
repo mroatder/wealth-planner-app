@@ -90,6 +90,7 @@ create table public.transactions (
   is_fixed      boolean not null default false,    -- fixed/recurring expense flag
   paid_by_partner boolean not null default false,  -- partner paid up front; amount = MY share, wallet is untouched
   is_shared     boolean not null default false,    -- split with the partner (stays true even after it is settled)
+  is_historical boolean not null default false,    -- imported history: kept for reports, never moves a wallet balance
   occurred_at   timestamptz not null default now(),
   note          text,
   slip_drive_file_id text,      -- Google Drive file id
@@ -170,8 +171,8 @@ select w.id as wallet_id, w.user_id, w.name, w.type,
                            when t.paid_by_partner then 0
                            when t.type in ('income','goal_withdraw','repayment') then t.amount
                            else -t.amount end)
-              from public.transactions t where t.wallet_id = w.id), 0)
-  + coalesce((select sum(t.amount) from public.transactions t where t.to_wallet_id = w.id), 0) as balance
+              from public.transactions t where t.wallet_id = w.id and not t.is_historical), 0)
+  + coalesce((select sum(t.amount) from public.transactions t where t.to_wallet_id = w.id and not t.is_historical), 0) as balance
 from public.wallets w
 where not w.is_archived;
 
