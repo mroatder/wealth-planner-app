@@ -35,7 +35,7 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: 'th' },
       meta: [
         // viewport-fit=cover lets the page draw under the iPhone notch/home bar; the layout already pads with safe-area insets
-        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover' },
         { name: 'color-scheme', content: 'light' },
         { name: 'theme-color', content: '#f5f5f7' },
         { name: 'mobile-web-app-capable', content: 'yes' },

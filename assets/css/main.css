@@ -21,6 +21,9 @@
   --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
 }
 @layer base {
+  /* app-like on phones: no double-tap zoom; 16px inputs stop iOS zooming in on focus */
+  html { touch-action: manipulation; }
+  @media (max-width: 767px) { input, select, textarea { font-size: 16px !important; } }
   html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
   body { @apply bg-paper font-sans text-[15px] text-ink; }
   ::selection { background: rgb(var(--c-accent) / 0.25); }
