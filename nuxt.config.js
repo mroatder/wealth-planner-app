@@ -34,10 +34,19 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'th' },
       meta: [
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        // viewport-fit=cover lets the page draw under the iPhone notch/home bar; the layout already pads with safe-area insets
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'color-scheme', content: 'light' },
+        { name: 'theme-color', content: '#f5f5f7' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-title', content: 'Wealth' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       ],
       link: [
+        { rel: 'manifest', href: '/manifest.webmanifest' },
+        { rel: 'icon', type: 'image/png', href: '/icons/icon-192.png' },
+        { rel: 'apple-touch-icon', href: '/icons/apple-touch-icon.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
