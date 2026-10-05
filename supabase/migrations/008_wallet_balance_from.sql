@@ -18,17 +18,7 @@ select w.id as wallet_id, w.user_id, w.name, w.type,
 from public.wallets w
 where not w.is_archived;
 
--- Your setup (edit the names if yours differ):
--- ไทยพาณิชย์: starts at 0 from the moment the 28 Sep income arrived
-update public.wallets w
-set initial_balance = 0,
-    balance_from = (select min(t.occurred_at) from public.transactions t
-                    where t.wallet_id = w.id and t.type = 'income'
-                      and t.occurred_at >= timestamptz '2026-09-28 00:00:00+07'
-                      and t.occurred_at <  timestamptz '2026-09-29 00:00:00+07')
-where w.name ilike '%ไทยพาณิชย์%' or w.name ilike '%scb%';
-
--- กรุงไทย: 618 baht on 29 Sep
-update public.wallets
-set initial_balance = 618, balance_from = timestamptz '2026-09-29 00:00:00+07'
-where name ilike '%กรุงไทย%' or name ilike '%ktb%';
+-- Fresh start at an exact moment: 6 Oct 2026 (2569) 00:16 Bangkok time. Every wallet is 0 from then; any transaction dated
+-- before that minute moves no balance (it stays in history/analytics). Then type each wallet's real bank balance as of
+-- that moment as its initial balance (wallets page).
+update public.wallets set initial_balance = 0, balance_from = timestamptz '2026-10-06 00:16:00+07';

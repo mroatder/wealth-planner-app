@@ -69,9 +69,10 @@ const stats = computed(() => {
   return s;
 });
 
-const showAll = ref(false);
+const PAGE = 15;
+const shown = ref(PAGE);
 const history = computed(() => [...ledger.value].reverse());
-const visible = computed(() => (showAll.value ? history.value : history.value.slice(0, 30)));
+const visible = computed(() => history.value.slice(0, shown.value));
 
 // ---------- settle up ----------
 const settle = reactive({ amount: '', walletId: '', note: '' });
@@ -140,10 +141,12 @@ function startNames() {
 }
 async function saveNames() {
   nameError.value = '';
-  if (!names.partner.trim()) return (nameError.value = 'กรุณาใส่ชื่อ');
+  const myName = names.me.trim();
+  const partnerName = names.partner.trim();
+  if (!myName && !partnerName) return (nameError.value = 'กรุณาใส่ชื่ออย่างน้อยหนึ่งชื่อ (ชื่อเราหรือชื่อแฟนก็ได้)');
   busy.value = true;
   const { error } = await supabase.from('users')
-    .update({ display_name: names.me.trim() || null, partner_name: names.partner.trim() })
+    .update({ display_name: myName || null, partner_name: partnerName || 'แฟน' })
     .eq('id', uid.value);
   busy.value = false;
   if (error) return (nameError.value = error.message);
@@ -267,9 +270,10 @@ async function saveNames() {
         </div>
       </li>
     </ul>
-    <button v-if="history.length > 30" class="mt-3 text-sm text-accent" @click="showAll = !showAll">
-      {{ showAll ? 'แสดงเฉพาะ 30 รายการล่าสุด' : `ดูทั้งหมด (${history.length} รายการ)` }}
-    </button>
+    <div v-if="history.length > PAGE" class="mt-3 flex items-center gap-4 text-sm text-accent">
+      <button v-if="shown < history.length" @click="shown += PAGE">ดูเพิ่ม ({{ history.length - shown }} รายการที่เหลือ)</button>
+      <button v-if="shown > PAGE" @click="shown = PAGE">ย่อกลับ</button>
+    </div>
     <p v-if="history.length" class="mt-3 px-1 text-xs text-muted">
       ตัวเลขใหญ่คือการเปลี่ยนแปลงของยอดค้าง (+ {{ partner }} ติดเรามากขึ้น · − น้อยลง หรือเราติดมากขึ้น) ตัวเลข "ค้าง" คือยอดสุทธิหลังรายการนั้น (+ {{ partner }} ติดเรา · − เราติด {{ partner }})
     </p>
