@@ -40,6 +40,7 @@ create table public.wallets (
   name            text not null,
   type            wallet_type not null default 'cash',
   initial_balance numeric(14,2) not null default 0,   -- credit card: negative = existing debt
+  balance_from    timestamptz,                         -- initial_balance is the balance at this moment; earlier transactions do not count
   is_archived     boolean not null default false,
   created_at      timestamptz not null default now(),
   unique (user_id, name),
@@ -171,8 +172,10 @@ select w.id as wallet_id, w.user_id, w.name, w.type,
                            when t.paid_by_partner then 0
                            when t.type in ('income','goal_withdraw','repayment') then t.amount
                            else -t.amount end)
-              from public.transactions t where t.wallet_id = w.id and not t.is_historical), 0)
-  + coalesce((select sum(t.amount) from public.transactions t where t.to_wallet_id = w.id and not t.is_historical), 0) as balance
+              from public.transactions t where t.wallet_id = w.id and not t.is_historical
+                and (w.balance_from is null or t.occurred_at >= w.balance_from)), 0)
+  + coalesce((select sum(t.amount) from public.transactions t where t.to_wallet_id = w.id and not t.is_historical
+                and (w.balance_from is null or t.occurred_at >= w.balance_from)), 0) as balance
 from public.wallets w
 where not w.is_archived;
 

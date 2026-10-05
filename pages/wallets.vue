@@ -8,7 +8,7 @@ const WALLET_TYPES = { cash: 'เงินสด', bank: 'บัญชีธน�
 // ---------- data ----------
 const { data, refresh, loaded } = useLoad('wallets-page', async () => {
   const [wallets, balances, net] = await Promise.all([
-    supabase.from('wallets').select('id,name,type,initial_balance').eq('is_archived', false).order('created_at'),
+    supabase.from('wallets').select('id,name,type,initial_balance,balance_from').eq('is_archived', false).order('created_at'),
     supabase.from('wallet_balances').select('wallet_id,balance'),
     supabase.from('net_worth').select('net_worth').maybeSingle(),
   ]);
@@ -52,14 +52,14 @@ async function addWallet() {
 
 // ---------- edit / archive ----------
 const editingId = ref(null);
-const edit = reactive({ name: '', type: 'cash', initial: '0' });
+const edit = reactive({ name: '', type: 'cash', initial: '0', from: '' });
 const editError = ref('');
 const confirmArchive = ref(false);
 
 function startEdit(w) {
   if (editingId.value === w.id) return (editingId.value = null);
   editingId.value = w.id;
-  Object.assign(edit, { name: w.name, type: w.type, initial: String(w.initial_balance) });
+  Object.assign(edit, { name: w.name, type: w.type, initial: String(w.initial_balance), from: w.balance_from ? toLocalInput(new Date(w.balance_from)) : '' });
   editError.value = '';
   confirmArchive.value = false;
 }
@@ -71,7 +71,7 @@ async function saveEdit() {
   if (Number.isNaN(initial)) return (editError.value = 'ยอดทั้งหมดไม่ถูกต้อง');
   busy.value = true;
   const { error } = await supabase.from('wallets')
-    .update({ name: edit.name.trim(), type: edit.type, initial_balance: initial })
+    .update({ name: edit.name.trim(), type: edit.type, initial_balance: initial, balance_from: edit.from ? new Date(edit.from).toISOString() : null })
     .eq('id', editingId.value);
   busy.value = false;
   if (error) return (editError.value = friendly(error));
@@ -163,6 +163,15 @@ async function archive() {
               <label class="label" :for="`e-init-${w.id}`">ยอดทั้งหมด</label>
               <input :id="`e-init-${w.id}`" v-model="edit.initial" inputmode="decimal" class="field num" />
             </div>
+          </div>
+          <div>
+            <div class="label">เริ่มนับยอดตั้งแต่</div>
+            <div v-if="edit.from" class="flex items-center gap-3">
+              <DateTimePicker24h v-model="edit.from" />
+              <button type="button" class="text-sm text-muted" @click="edit.from = ''">นับทุกรายการ</button>
+            </div>
+            <button v-else type="button" class="btn btn-quiet" @click="edit.from = toLocalInput(new Date())">กำหนดวันเริ่มนับ</button>
+            <p class="mt-1 text-xs text-muted">ยอดทั้งหมดด้านบนคือเงินในกระเป๋า ณ เวลานี้ รายการก่อนหน้านี้ไม่หักเงิน (ยังอยู่ในประวัติ)</p>
           </div>
           <p v-if="editError" class="text-sm text-expense">{{ editError }}</p>
           <div class="flex flex-wrap items-center justify-between gap-3">

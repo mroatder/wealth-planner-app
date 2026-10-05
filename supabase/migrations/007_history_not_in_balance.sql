@@ -13,8 +13,8 @@ select w.id as wallet_id, w.user_id, w.name, w.type,
 from public.wallets w
 where not w.is_archived;
 
--- One-off: everything dated before the 1st of this month (Bangkok time) is treated as history.
--- Rows from this month onwards keep counting. Adjust or skip this statement if that is not what you want.
+-- One-off: everything dated before the cut-off is history (no effect on wallet balances). The cut-off is the start of the
+-- pay cycle you track from (here 28 Sep 2026, Bangkok time), so the income received that day still counts.
+-- Set each wallet's initial balance to the bank balance you had just BEFORE that moment.
 update public.transactions
-set is_historical = true
-where occurred_at < date_trunc('month', now() at time zone 'Asia/Bangkok') at time zone 'Asia/Bangkok';
+set is_historical = (occurred_at < timestamptz '2026-09-28 00:00:00+07');
