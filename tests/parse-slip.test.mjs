@@ -109,6 +109,15 @@ Fee 0.00 THB`,
     expect: { amount: 1250, occurredAt: at('2025-10-05', '14:32'), bank: 'scb' },
   },
   {
+    name: 'OCR splits the vowel sara-am (ำ -> ํ + า): the "จำนวน" label must still be recognised',
+    text: `โอนเงินสําเร็จ
+5 ต.ค. 68 - 14:32 น.
+จํานวนเงิน 80.00 บาท
+ค่าธรรมเนียม 5.00 บาท
+1,999.00 บาท`,
+    expect: { amount: 80, occurredAt: at('2025-10-05', '14:32'), amountSource: 'label', confidence: 'high' },
+  },
+  {
     name: 'Thai digits',
     text: `โอนเงินสำเร็จ
 ๕ ต.ค. ๖๘ ๑๔:๓๒ น.

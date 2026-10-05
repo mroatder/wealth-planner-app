@@ -22,6 +22,7 @@ function normalize(raw) {
     .replace(/[๐-๙]/g, (d) => String(THAI_DIGITS.indexOf(d)))
     .replace(/\r/g, '')
     .replace(/[​-‍﻿]/g, '')
+    .replace(/ํา/g, 'ำ') // OCR often splits the vowel "ำ" into "ํ" + "า"; put it back together
     .replace(new RegExp(`([${THAI}])[ \\t]+(?=[${THAI}])`, 'g'), '$1') // glue letters split by OCR
     .replace(/[ \t]+/g, ' ')
     .trim();

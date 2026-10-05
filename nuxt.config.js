@@ -1,3 +1,9 @@
+import { fileURLToPath } from 'node:url';
+
+// Which engine tesseract.js loads in Node depends on its internals (today it picks the plain "simd" one), so ship all four.
+const tesseractEngineFiles = ['tesseract-core-simd.wasm', 'tesseract-core.wasm', 'tesseract-core-simd-lstm.wasm', 'tesseract-core-lstm.wasm']
+  .map((f) => fileURLToPath(new URL(`./node_modules/tesseract.js-core/${f}`, import.meta.url)));
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   // Client-side rendering only: every Supabase call is made by the browser, which trusts the OS certificate store.
@@ -20,6 +26,9 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'vercel',
     vercel: { functions: { maxDuration: 60 } }, // OCR can take several seconds
+    // Tesseract's loader reads its .wasm engine from disk at run time, which Vercel's file tracing cannot see,
+    // so the serverless function would be deployed without it. Include the engines explicitly.
+    externals: { traceInclude: tesseractEngineFiles },
   },
   app: {
     head: {

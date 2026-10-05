@@ -1,3 +1,4 @@
+import { tmpdir } from 'node:os';
 import { google } from 'googleapis';
 
 const withTimeout = (promise, ms, label) => Promise.race([
@@ -7,7 +8,12 @@ const withTimeout = (promise, ms, label) => Promise.race([
 
 async function withTesseract(buffer) {
   const { createWorker } = await import('tesseract.js');
-  const worker = await createWorker('tha+eng');
+  // Serverless file systems are read-only except the temp folder: keep the downloaded language data there,
+  // so warm invocations reuse it (and nothing is written into the project folder while developing).
+  const options = { cachePath: tmpdir() };
+  // Optional: read the language files from a local folder (tha.traineddata, eng.traineddata) instead of the CDN.
+  if (process.env.TESSERACT_LANG_PATH) Object.assign(options, { langPath: process.env.TESSERACT_LANG_PATH, gzip: false });
+  const worker = await createWorker('tha+eng', 1, options);
   try {
     const { data } = await worker.recognize(buffer);
     return data.text;
