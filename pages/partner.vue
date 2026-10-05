@@ -129,58 +129,16 @@ async function toggleItem(t) {
     busy.value = false;
   }
 }
-
-// ---------- names ----------
-const editingNames = ref(false);
-const names = reactive({ me: '', partner: '' });
-const nameError = ref('');
-function startNames() {
-  Object.assign(names, { me: me.value === 'เรา' ? '' : me.value, partner: partner.value === 'แฟน' ? '' : partner.value });
-  nameError.value = '';
-  editingNames.value = true;
-}
-async function saveNames() {
-  nameError.value = '';
-  const myName = names.me.trim();
-  const partnerName = names.partner.trim();
-  if (!myName && !partnerName) return (nameError.value = 'กรุณาใส่ชื่ออย่างน้อยหนึ่งชื่อ (ชื่อเราหรือชื่อแฟนก็ได้)');
-  busy.value = true;
-  const { error } = await supabase.from('users')
-    .update({ display_name: myName || null, partner_name: partnerName || 'แฟน' })
-    .eq('id', uid.value);
-  busy.value = false;
-  if (error) return (nameError.value = error.message);
-  editingNames.value = false;
-  await refresh();
-}
 </script>
 
 <template>
   <div class="mx-auto max-w-3xl">
-    <div class="flex items-end justify-between gap-4">
-      <h1 class="title">ยอดค้างกับ {{ partner }}</h1>
-      <button class="text-sm text-accent" @click="editingNames ? (editingNames = false) : startNames()">{{ editingNames ? 'ปิด' : 'เปลี่ยนชื่อ' }}</button>
-    </div>
+    <h1 class="title">ยอดค้างกับ {{ partner }}</h1>
 
     <p v-if="loadErr" class="mt-4 rounded-lg bg-expense/10 px-4 py-3 text-sm text-expense">
       โหลดข้อมูลไม่สำเร็จ: {{ loadErr.message }}
       <span class="block text-xs text-muted">ถ้าเพิ่งอัปเดตฐานข้อมูล ให้ตรวจว่ารัน migration 002a และ 002b ใน Supabase แล้ว</span>
     </p>
-
-    <form v-if="editingNames" class="card mt-4 space-y-4 p-5" @submit.prevent="saveNames">
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label class="label" for="n-me">ชื่อเรา</label>
-          <input id="n-me" v-model="names.me" class="field" placeholder="เช่น Oat" />
-        </div>
-        <div>
-          <label class="label" for="n-partner">ชื่อแฟน</label>
-          <input id="n-partner" v-model="names.partner" class="field" placeholder="เช่น Rin" />
-        </div>
-      </div>
-      <p v-if="nameError" class="text-sm text-expense">{{ nameError }}</p>
-      <button class="btn btn-primary" :disabled="busy">บันทึกชื่อ</button>
-    </form>
 
     <!-- Net balance -->
     <section class="card mt-6 px-5 py-5">
