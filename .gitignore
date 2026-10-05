@@ -1,0 +1,38 @@
+# ---- dependencies and build output -------------------------------------------
+node_modules
+.nuxt
+.output
+.vercel
+.data
+dist
+
+# ---- secrets and local configuration: NEVER commit ---------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.json.key
+*service-account*.json
+*credentials*.json
+
+# ---- personal data -----------------------------------------------------------
+transactions_import.csv
+/*.csv
+
+# ---- downloaded by Tesseract at runtime --------------------------------------
+*.traineddata
+
+# ---- editor / OS / tool noise ------------------------------------------------
+.DS_Store
+Thumbs.db
+*.log
+.geminiignore
+.claude/
+.vscode/
+
+# ---- obsolete experiments that must not be run (see DEPLOY.md) ---------------
+# 003_add_is_settled.sql  : superseded by 006_settle_items.sql
+# 005_slips_bucket.sql    : makes the slip bucket public and writable by everyone; 005_slips_storage.sql replaces it
+supabase/migrations/003_add_is_settled.sql
+supabase/migrations/005_slips_bucket.sql

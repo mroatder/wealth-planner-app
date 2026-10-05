@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- macOS system colours (space-separated RGB so Tailwind opacity modifiers work) ---- */
+:root {
+  color-scheme: light; /* always light, regardless of the OS setting */
+  --c-paper: 245 245 247;
+  --c-surface: 255 255 255;
+  --c-ink: 29 29 31;
+  --c-muted: 110 110 115;
+  --c-faint: 174 174 178;
+  --c-line: 224 224 228;
+  --c-accent: 0 122 255;
+  --c-income: 36 138 61;
+  --c-expense: 215 0 21;
+  --c-warn: 227 124 0;
+  --sidebar: rgb(236 236 240 / 0.72);
+  /* chart categorical palette, fixed order (validated: light + dark) */
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+}
+@layer base {
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { @apply bg-paper font-sans text-[15px] text-ink; }
+  ::selection { background: rgb(var(--c-accent) / 0.25); }
+}
+
+@layer components {
+  .title { @apply text-[28px] font-bold leading-tight tracking-tight; }
+  .section-label { @apply px-1 text-xs font-medium text-muted; }
+  .card { @apply min-w-0 rounded-xl bg-surface shadow-card; }
+  .label { @apply mb-1.5 block text-[13px] font-medium text-muted; }
+  .field {
+    @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-[15px] text-ink
+           placeholder:text-faint transition focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent/25;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-[15px] font-medium
+           transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary { @apply bg-accent text-white hover:brightness-110; }
+  .btn-quiet   { @apply bg-ink/[0.06] text-ink hover:bg-ink/10; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* translucent "vibrancy" panels */
+  .sidebar { background: var(--sidebar); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px); }
+  .tabbar  { @apply bg-surface/80 backdrop-blur-xl backdrop-saturate-150; }
+
+  /* segmented control */
+  .segmented { @apply grid gap-0.5 rounded-lg bg-ink/[0.07] p-0.5; }
+  .segmented button { @apply rounded-md py-1.5 text-[13px] font-medium text-ink/70 transition; }
+  .segmented button[aria-pressed='true'] { @apply bg-surface text-ink shadow-seg; }
+}

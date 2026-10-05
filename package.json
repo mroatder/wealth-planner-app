@@ -1,0 +1,26 @@
+{
+  "name": "wealth-planner-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "test:slip": "node tests/parse-slip.test.mjs",
+    "test:analytics": "node tests/analytics.test.mjs",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/supabase": "^1.4.0",
+    "@nuxtjs/tailwindcss": "^6.12.0",
+    "googleapis": "^144.0.0",
+    "nuxt": "^3.14.0",
+    "tesseract.js": "^5.1.1",
+    "vue": "^3.5.0",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
+  }
+}
